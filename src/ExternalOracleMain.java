@@ -18,6 +18,8 @@ import java.awt.Label;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Random;
 
 import com.swirlds.platform.Browser;
@@ -138,6 +140,43 @@ public class ExternalOracleMain implements SwirldMain {
 			console.out.println("Calculating oracle for the external data"); 
 			
 			// DATA CALCULATION FOR EXTERNAL DATA
+			// SIMPLE ALGORITHM -> GETTING MOST VOTED
+			 Map<String, Integer> voted = new HashMap<String, Integer>();
+			 String[] stringArray = stateString.split(" ");
+			 for (int i = 0; i < stringArray.length; i++) {
+				 String name = "";
+				 String value = "";
+				 if (i % 2 == 0) {
+					 name = stringArray[i];
+				 }
+				 else {
+					 value = stringArray[i];
+					 
+					 if (voted.containsKey(value)){
+						int vote =  voted.get(value);
+						voted.put(value, vote + 1);
+					 }
+					 else {
+						voted.put(value, 1);					 
+					 }
+				 }
+			 }
+			 
+			String maxkey = "";
+			int maxVote = 0;
+			for (Map.Entry<String, Integer> entry : voted.entrySet())
+			{
+				String key = entry.getKey();
+				int vote = entry.getValue();
+				
+				if (maxVote < vote) {
+					maxVote = vote;
+					maxkey = key;
+				}
+			}
+			
+			console.out.println("Max voted result : " + maxkey); 
+ 
 			
 		} catch(Exception e){
 			LogException(e);
