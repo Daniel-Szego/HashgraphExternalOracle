@@ -38,13 +38,13 @@ public class ExternalOracleState implements SwirldState {
 
 	// SHARED STATE
 	//shared state is a map of identifier -> integers (random number) 
- 	private Map<String, Integer> randoms = new HashMap<String, Integer>();
+ 	private Map<String, String> randoms = new HashMap<String, String>();
 	
 	/** names and addresses of all members */
 	private AddressBook addressBook;
 
 	/** @return all the state information received so far from the network */
-	public synchronized Map<String, Integer> getState() {
+	public synchronized Map<String, String> getState() {
 		return randoms;
 	}
 
@@ -53,24 +53,23 @@ public class ExternalOracleState implements SwirldState {
 	/** @return all the strings received so far from the network, concatenated into one */
 	public synchronized String getReceived() {
 		String result = "";
-		for (Map.Entry<String, Integer> entry : randoms.entrySet())
+		for (Map.Entry<String, String> entry : randoms.entrySet())
 		{
 			String key = entry.getKey();
-			Integer value = entry.getValue();
+			String value = entry.getValue();
 			result += key + " " + value.toString() + " ";
 		}
 		return result;
 	}
 	
 	
-
 	/** @return the same as getReceived, so it returns the entire shared state as a single string */
 	public synchronized String toString() {
 		String result = "";
-		for (Map.Entry<String, Integer> entry : randoms.entrySet())
+		for (Map.Entry<String, String> entry : randoms.entrySet())
 		{
 			String key = entry.getKey();
-			Integer value = entry.getValue();
+			String value = entry.getValue();
 			result += key + " " + value.toString() + " ";
 		}
 		return result;	
@@ -93,24 +92,22 @@ public class ExternalOracleState implements SwirldState {
 	@Override
 	public synchronized void copyTo(FCDataOutputStream outStream) {
 		try {
-			List<String> stringArray = new ArrayList<String>();
-			List<Integer> intArray = new ArrayList<Integer>();
+			List<String> stringArray1 = new ArrayList<String>();
+			List<String> stringArray2 = new ArrayList<String>();
 			
-			for (Map.Entry<String, Integer> entry : randoms.entrySet())
+			for (Map.Entry<String, String> entry : randoms.entrySet())
 			{
 				String key = entry.getKey();
-				Integer value = entry.getValue();
-				stringArray.add(key);
-				intArray.add(value);
+				String value = entry.getValue();
+				stringArray1.add(key);
+				stringArray2.add(value);
 			}
 
 			Utilities.writeStringArray(outStream, 
-					stringArray.toArray(new String[0]));
+					stringArray1.toArray(new String[0]));
 
-			int[] intArray2 = intArray.stream().mapToInt(i->i).toArray();
-
-			Utilities.writeIntArray(outStream,
-					intArray2);
+			Utilities.writeStringArray(outStream, 
+					stringArray2.toArray(new String[0]));
 			
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -120,18 +117,20 @@ public class ExternalOracleState implements SwirldState {
 	@Override
 	public synchronized void copyFrom(FCDataInputStream inStream) {
 		try {
-			List<String> stringArray = new ArrayList<String>(
+			List<String> stringArray1 = new ArrayList<String>(
+					Arrays.asList(Utilities.readStringArray(inStream)));
+
+			List<String> stringArray2 = new ArrayList<String>(
 					Arrays.asList(Utilities.readStringArray(inStream)));
 			
-			int[] intArray = Utilities.readIntArray(inStream);
-			
-			if (stringArray.size() != intArray.length) {
+			if (stringArray1.size() != stringArray2.size()) {
 				throw new IOException("Size mismatch");	
 			}
 			
-			for (int i = 0; i < stringArray.size(); i ++) {
-				String key = stringArray.get(i);
-				randoms.put(key, new Integer(intArray[i]));				
+			for (int i = 0; i < stringArray1.size(); i ++) {
+				String key = stringArray1.get(i);
+				String value = stringArray2.get(i);
+				randoms.put(key, value);				
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -140,7 +139,7 @@ public class ExternalOracleState implements SwirldState {
 
 	@Override
 	public synchronized void copyFrom(SwirldState old) {
-		randoms = new HashMap<String, Integer>(((ExternalOracleState)old).randoms);
+		randoms = new HashMap<String, String>(((ExternalOracleState)old).randoms);
 		addressBook = ((ExternalOracleState) old).addressBook.copy();
 	}
 
@@ -151,9 +150,8 @@ public class ExternalOracleState implements SwirldState {
 		try {
 			String transactionString = new String(transaction, StandardCharsets.UTF_8);
 			String name = transactionString.substring(0, transactionString.indexOf("-")-1 );
-			String integerString = transactionString.substring(transactionString.indexOf("-") + 2, transactionString.length());		
-			randoms.put(name, new Integer(integerString));
-			
+			String value = transactionString.substring(transactionString.indexOf("-") + 2, transactionString.length());		
+			randoms.put(name, value);	
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
