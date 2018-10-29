@@ -32,7 +32,7 @@ import java.math.BigInteger;
  * into a busy loop (checking once a second) to see when the state gets the transaction. When it does, it
  * prints it, too.
  */
-public class RandomOracleMain implements SwirldMain {
+public class ExternalOracleMain implements SwirldMain {
 	/** the platform running this app */
 	public Platform platform;
 	/** ID number for this member */
@@ -112,7 +112,7 @@ public class RandomOracleMain implements SwirldMain {
 			int rounds = 0;
 			String stateString = "";
 			while (true) {
-				RandomOracleState state = (RandomOracleState) platform
+				ExternalOracleState state = (ExternalOracleState) platform
 						.getState();
 				String received = state.getReceived();				
 				rounds++;					
@@ -152,7 +152,7 @@ public class RandomOracleMain implements SwirldMain {
 
 	@Override
 	public SwirldState newState() {
-		return new RandomOracleState();
+		return new ExternalOracleState();
 	}
 	
 

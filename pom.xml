@@ -10,11 +10,11 @@
     <app.repo>${project.baseUri}../../data/repos/app/</app.repo>
     <platform.repo>${project.baseUri}../../data/repos/platform/</platform.repo>
     <sdk.dir>${project.basedir}/../..</sdk.dir>
-    <app.name>RandomOracle</app.name>
+    <app.name>ExternalOracle</app.name>
   </properties>
 
   <modelVersion>4.0.0</modelVersion>
-  <groupId>RandomOracle</groupId>
+  <groupId>ExternalOracle</groupId>
   <!-- Eclipse can't handle a variable ref here -->
-  <artifactId>RandomOracle</artifactId>
+  <artifactId>ExternalOracle</artifactId>
 </project>
