@@ -26,6 +26,9 @@ import com.swirlds.platform.Platform;
 import com.swirlds.platform.SwirldMain;
 import com.swirlds.platform.SwirldState;
 import java.math.BigInteger;
+import java.net.*;
+import java.io.*;
+
 
 /**
  * This HelloSwirld creates a single transaction, consisting of the string "Hello Swirld", and then goes
@@ -44,8 +47,6 @@ public class ExternalOracleMain implements SwirldMain {
 	/** number of rounds after the calculation starts */
 	/** it has to be replaced by the real consensus event */
 	public final int calculatingStarts = 50;
-	/** random number is find in this range*/
-	public final int randomRange = 50000;
 	
 		
 	/**
@@ -75,7 +76,7 @@ public class ExternalOracleMain implements SwirldMain {
 
 		String[] pars = platform.getParameters();
 		
-		platform.setAbout("Decentralized Oracle v. 0.1\n"); // set the browser's "about" box
+		platform.setAbout("Decentralized External Oracle v. 0.1\n"); // set the browser's "about" box
 		platform.setSleepAfterSync(sleepPeriod);
 
 	}	
@@ -95,15 +96,14 @@ public class ExternalOracleMain implements SwirldMain {
 					.getAddress(selfId).getSelfName();
 	
 			
-			console.out.println("Decentralized Random Oracle v.0.1");	
+			console.out.println("Decentralized External Oracle v.0.1");	
 			console.out.println("My name is " + myName);
 			
-			// this is cryptographically secure
-			SecureRandom secRan = new SecureRandom();
-		  	int n = secRan.nextInt() % randomRange;
-					  	
-			console.out.println("Choosen Random is " + n);
-			String transactionString = myName + " - " + n;	
+			// calling external data
+			String externalData = ReadExternalData();
+			
+			console.out.println("External data is " + externalData);
+			String transactionString = myName + " - " + externalData;	
 			byte[] transaction = transactionString.getBytes(StandardCharsets.UTF_8);
 			
 			platform.createTransaction(transaction);
@@ -135,15 +135,9 @@ public class ExternalOracleMain implements SwirldMain {
 				}
 			}
 			
-			console.out.println("Calculating random number"); // print all received transactions			
+			console.out.println("Calculating oracle for the external data"); 
 			
-			// RANDOM ORACLE ALGORITHM MIGHT BE REVISITED
-			// IF IT IS CRYPTOGRAPHICALLY SECURE
-			MessageDigest digest = MessageDigest.getInstance("SHA-256");
-			byte[] hash = digest.digest(stateString.getBytes(StandardCharsets.UTF_8));
-			int bigIntegerValue = new BigInteger(hash).intValue();
-			int result = bigIntegerValue % randomRange;
-			console.out.println("Random number : " + result);
+			// DATA CALCULATION FOR EXTERNAL DATA
 			
 		} catch(Exception e){
 			LogException(e);
@@ -155,6 +149,36 @@ public class ExternalOracleMain implements SwirldMain {
 		return new ExternalOracleState();
 	}
 	
+	public String ReadExternalData() {
+		String result = "";
+		
+        // Make a URL to the web page
+        URL url;
+		try {
+			url = new URL("http://stackoverflow.com/questions/6159118/using-java-to-pull-data-from-a-webpage");
+
+	        // Get the input stream through URL Connection
+	        URLConnection con = url.openConnection();
+	        InputStream is =con.getInputStream();
+	
+	        BufferedReader br = new BufferedReader(new InputStreamReader(is));
+	
+	        String line = null;
+	
+	        // simple test result
+	        result = br.readLine();
+	        if (result.length() > 5)
+	        result = result.substring(0, 4);
+	        // read each line and write to System.out
+	        //while ((line = br.readLine()) != null) {
+	        //    System.out.println(line);
+	        //}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+        return result;
+	}
 
 	
 }
